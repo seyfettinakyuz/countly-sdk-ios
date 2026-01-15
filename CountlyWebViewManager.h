@@ -28,7 +28,8 @@ typedef NS_ENUM(NSUInteger, AnimationType) {
 - (void)createWebViewWithURL:(NSURL *)url
                      frame:(CGRect)frame
                  appearBlock:(void(^ __nullable)(void))appearBlock
-                dismissBlock:(void(^ __nullable)(void))dismissBlock;
+                dismissBlock:(void(^ __nullable)(void))dismissBlock
+                deeplinkBlock:(void(^ __nullable)(NSURL *))deeplinkBlock;
 
 
 

@@ -10,6 +10,7 @@
 @property (nonatomic, strong) PassThroughBackgroundView *backgroundView;
 @property (nonatomic, copy) void (^dismissBlock)(void);
 @property (nonatomic, copy) void (^appearBlock)(void);
+@property (nonatomic, copy) void (^deeplinkBlock)(NSURL *);
 @property (nonatomic) BOOL topMarginApplied;
 @property (nonatomic) float topMargin;
 @property (nonatomic, strong) NSTimer *loadTimeoutTimer;
@@ -22,7 +23,8 @@
 - (void)createWebViewWithURL:(NSURL *)url
                        frame:(CGRect)frame
                  appearBlock:(void(^ __nullable)(void))appearBlock
-                dismissBlock:(void(^ __nullable)(void))dismissBlock {
+                dismissBlock:(void(^ __nullable)(void))dismissBlock
+                deeplinkBlock:(void(^ __nullable)(NSURL *))deeplinkBlock {
     self.dismissBlock = dismissBlock;
     self.appearBlock = appearBlock;
     self.hasAppeared = NO;
@@ -372,13 +374,15 @@
 - (void)openExternalLink:(NSString *)urlString {
     NSURL *url = [NSURL URLWithString:urlString];
     if (url) {
-        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:^(BOOL success) {
-            if (success) {
-                CLY_LOG_I(@"URL [%@] opened in external browser", urlString);
-            } else {
-                CLY_LOG_I(@"Unable to open URL [%@] in external browser", urlString);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.loadStartDate = nil;
+            [self.loadTimeoutTimer invalidate];
+            self.loadTimeoutTimer = nil;
+            if (self.deeplinkBlock) {
+                self.deeplinkBlock(url);
             }
-        }];
+            [self.backgroundView removeFromSuperview];
+        });
     }
 }
 
