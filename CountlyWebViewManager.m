@@ -27,6 +27,7 @@
                 deeplinkBlock:(void(^ __nullable)(NSURL *))deeplinkBlock {
     self.dismissBlock = dismissBlock;
     self.appearBlock = appearBlock;
+    self.deeplinkBlock = deeplinkBlock;
     self.hasAppeared = NO;
     // TODO: keyWindow deprecation fix
     UIViewController *rootViewController = UIApplication.sharedApplication.keyWindow.rootViewController;
