@@ -91,18 +91,24 @@ NSString* const kCountlyFBKeyShown          = @"shown";
         CLY_LOG_I(@"%s, Placement frame: %@", __FUNCTION__, NSStringFromCGRect(frame));
         
         CountlyWebViewManager* webViewManager =  CountlyWebViewManager.new;
-            [webViewManager createWebViewWithURL:[self generateWidgetURL] frame:frame appearBlock:^
+        [webViewManager createWebViewWithURL:[self generateWidgetURL] frame:frame appearBlock:^
              {
-                CLY_LOG_I(@"%s, Webview appeared", __FUNCTION__);
-                if(widgetCallback)
-                    widgetCallback(WIDGET_APPEARED);
-            } dismissBlock:^
+            CLY_LOG_I(@"%s, Webview appeared", __FUNCTION__);
+            if(widgetCallback)
+                widgetCallback(WIDGET_APPEARED);
+        } dismissBlock:^
              {
-                CLY_LOG_I(@"%s, Webview dismissed", __FUNCTION__);
-                if (widgetCallback)
-                    widgetCallback(WIDGET_CLOSED);
-                [self recordReservedEventForDismissing];
-            }];
+            CLY_LOG_I(@"%s, Webview dismissed", __FUNCTION__);
+            if (widgetCallback)
+                widgetCallback(WIDGET_CLOSED);
+            [self recordReservedEventForDismissing];
+        } deeplinkBlock:^(NSURL *deeplinkURL)
+         {
+            CLY_LOG_I(@"%s, Webview deeplink", __FUNCTION__);
+            if (widgetCallback)
+                widgetCallback(WIDGET_CLOSED);
+            [self recordReservedEventForDismissing];
+        }];
     });
 }
 
@@ -111,7 +117,7 @@ NSString* const kCountlyFBKeyShown          = @"shown";
     CLY_LOG_I(@"%s %@", __FUNCTION__, widgetCallback);
     if (!CountlyConsentManager.sharedInstance.consentForFeedback)
         return;
-        
+    
     if (self.widgetVersion && ![self.widgetVersion isKindOfClass:[NSNull class]]) {
         [self presentWidget_new:widgetCallback];
         return;
@@ -143,7 +149,7 @@ NSString* const kCountlyFBKeyShown          = @"shown";
     dismissButton.onClick = ^(id sender)
     {
         [webVC dismissViewControllerAnimated:YES completion:^
-        {
+         {
             CLY_LOG_D(@"Feedback widget dismissed. Widget ID: %@, Name: %@", self.ID, self.name);
             if (widgetCallback)
                 widgetCallback(WIDGET_CLOSED);
@@ -171,10 +177,10 @@ NSString* const kCountlyFBKeyShown          = @"shown";
         statusCode = http.statusCode;
         headers = http.allHeaderFields;
     }
-
+    
     CLY_LOG_I(@"%s Navigation response received: URL=%@, MIME=%@, status=%ld, headers=%@",
               __FUNCTION__, response.URL.absoluteString, mimeType, statusCode, headers);
-
+    
     if (statusCode >= 400) {
         CLY_LOG_I(@"%s Cancelling navigation due to HTTP status code: %ld", __FUNCTION__, statusCode);
         decisionHandler(WKNavigationResponsePolicyCancel);
@@ -191,7 +197,7 @@ NSString* const kCountlyFBKeyShown          = @"shown";
         });
         return;
     }
-
+    
     decisionHandler(WKNavigationResponsePolicyAllow);
 }
 
@@ -206,7 +212,7 @@ NSString* const kCountlyFBKeyShown          = @"shown";
     }
     
     NSURLSessionTask* task = [CountlyCommon.sharedInstance.URLSession dataTaskWithRequest:[self dataRequest] completionHandler:^(NSData* data, NSURLResponse* response, NSError* error)
-    {
+                              {
         NSDictionary *widgetData = nil;
         
         if (!error)
@@ -227,7 +233,7 @@ NSString* const kCountlyFBKeyShown          = @"shown";
         self.data = widgetData;
         
         dispatch_async(dispatch_get_main_queue(), ^
-        {
+                       {
             if (completionHandler)
                 completionHandler(widgetData, error);
         });

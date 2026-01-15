@@ -280,7 +280,7 @@ NSInteger const contentInitialDelay = 4;
                 }
             } deeplinkBlock:^(NSURL *deeplinkURL)
                  {
-                    CLY_LOG_I(@"%s webview dismissed", __FUNCTION__);
+                    CLY_LOG_I(@"%s webview deeplink", __FUNCTION__);
                     self->_isCurrentlyContentShown = NO;
                     self->_minuteTimer = [NSTimer scheduledTimerWithTimeInterval:self->_zoneTimerInterval
                                                                      target:self
