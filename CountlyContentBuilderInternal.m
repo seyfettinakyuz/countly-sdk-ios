@@ -278,7 +278,22 @@ NSInteger const contentInitialDelay = 4;
                 if(self.contentCallback) {
                     self.contentCallback(CLOSED, NSDictionary.new);
                 }
-            }];
+            } deeplinkBlock:^(NSURL *deeplinkURL)
+                 {
+                    CLY_LOG_I(@"%s webview dismissed", __FUNCTION__);
+                    self->_isCurrentlyContentShown = NO;
+                    self->_minuteTimer = [NSTimer scheduledTimerWithTimeInterval:self->_zoneTimerInterval
+                                                                     target:self
+                                                                   selector:@selector(enterContentZone)
+                                                                   userInfo:nil
+                                                                    repeats:NO];
+                    if(self.contentCallback) {
+                        NSDictionary *data = @{@"deeplink": deeplinkURL.absoluteString ?: @""};
+                        self.contentCallback(CLOSED, data);
+                    }
+                }
+             
+            ];
             CLY_LOG_I(@"%s webview initiated pausing content calls ", __FUNCTION__);
             self->_isCurrentlyContentShown = YES;
             [self clearContentState];
